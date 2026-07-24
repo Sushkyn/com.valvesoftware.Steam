@@ -107,10 +107,10 @@ def keyfile_get_string_dict(keyfile, section, key):
         return {}
 
 
-def read_flatpak_info():
+def read_flatpak_info(path=FLATPAK_INFO):
     flatpak_info = GLib.KeyFile.new()
-    assert flatpak_info.load_from_file(FLATPAK_INFO, GLib.KeyFileFlags.NONE)
-
+    if not flatpak_info.load_from_file(path, GLib.KeyFileFlags.NONE):
+        raise RuntimeError(f"Cannot load flatpak info from {path}")
     try:
         filesystems = flatpak_info.get_string_list("Context", "filesystems")
     except GLib.Error:
@@ -479,7 +479,7 @@ def main(steam_binary=STEAM_PATH):
     argv = [sys.argv[0], '-no-cef-sandbox'] + sys.argv[1:]
     logging.basicConfig(level=logging.DEBUG)
     logging.info(WIKI_URL)
-    current_info = read_flatpak_info()
+    current_info = read_flatpak_info("/.flatpak-info")
     check_allowed_to_run(current_info)
     check_extensions(current_info)
     should_update_symlinks = env_is_true(os.environ.get("FLATPAK_STEAM_UPDATE_SYMLINKS", "0"))
