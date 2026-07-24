@@ -106,38 +106,10 @@ def keyfile_get_string_dict(keyfile, section, key):
     except GLib.Error:
         return {}
 
+
 def read_flatpak_info():
     flatpak_info = GLib.KeyFile.new()
-
-    try:
-        flatpak_info.load_from_file(FLATPAK_INFO, GLib.KeyFileFlags.NONE)
-    except GLib.Error as e:
-        raise RuntimeError(f"Could not read {FLATPAK_INFO}: {e}")
-
-    def safe_get_string(group: str, key: str, default=None):
-        if not flatpak_info.has_group(group):
-            return default
-
-        try:
-            if not flatpak_info.has_key(group, key):
-                return default
-        except TypeError:
-            if not flatpak_info.has_key(group, key, None):
-                return default
-
-        try:
-            return flatpak_info.get_string(group, key)
-        except GLib.Error:
-            return default
-
-    def safe_get_string_dict(group: str, key: str):
-        if not flatpak_info.has_group(group):
-            return {}
-
-        try:
-            return keyfile_get_string_dict(flatpak_info, group, key)
-        except GLib.Error:
-            return {}
+    assert flatpak_info.load_from_file(FLATPAK_INFO, GLib.KeyFileFlags.NONE)
 
     try:
         filesystems = flatpak_info.get_string_list("Context", "filesystems")
@@ -145,13 +117,14 @@ def read_flatpak_info():
         filesystems = []
 
     return {
-        "flatpak-version": safe_get_string("Instance", "flatpak-version"),
-        "runtime": safe_get_string("Application", "runtime"),
-        "runtime-path": safe_get_string("Instance", "runtime-path"),
-        "app-extensions": safe_get_string_dict("Instance", "app-extensions"),
-        "runtime-extensions": safe_get_string_dict("Instance", "runtime-extensions"),
-        "filesystems": filesystems,
+        "flatpak-version": flatpak_info.get_string("Instance", "flatpak-version"),
+        "runtime": flatpak_info.get_string("Application", "runtime"),
+        "runtime-path": flatpak_info.get_string("Instance", "runtime-path"),
+        "app-extensions": keyfile_get_string_dict(flatpak_info, "Instance", "app-extensions"),
+        "runtime-extensions": keyfile_get_string_dict(flatpak_info, "Instance", "runtime-extensions"),
+        "filesystems": filesystems
     }
+
 
 def env_is_true(env_str: str):
     if env_str.lower() in ["y", "yes", "true"]:
