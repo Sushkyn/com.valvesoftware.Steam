@@ -1,9 +1,1 @@
-This is a thin Flatpak wrapper for Steam using Freedesktop Runtime
-
-Please report [tested games](https://github.com/flathub/com.valvesoftware.Steam/wiki/Tested-Games) so we have better impression what
-works and what does not.
-
-If you're having issues, first see FAQ on [the wiki](https://github.com/flathub/com.valvesoftware.Steam/wiki)
-to see if you're hitting some corner-case that needs manual intervention. If your case isn't listed, file an issue in addition to adding an entry in tested games.
-
-Minimum Flatpak version required 1.12.0
+flatpak steam does not work on most of the distros based on arch, ending up with wrapper.py error, here is the fix. clone the repo and flatpak-builder --user --install --force-clean build-dir com.valvesoftware.Steam.yml
