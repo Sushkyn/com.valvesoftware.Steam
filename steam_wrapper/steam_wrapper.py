@@ -108,21 +108,31 @@ def keyfile_get_string_dict(keyfile, section, key):
 
 
 def read_flatpak_info():
-    flatpak_info = GLib.KeyFile.new()
-    assert flatpak_info.load_from_file(FLATPAK_INFO, GLib.KeyFileFlags.NONE)
 
-    try:
-        filesystems = flatpak_info.get_string_list("Context", "filesystems")
-    except GLib.Error:
-        filesystems = []
+    def safe_get_string(group: str, key: str, default: str | None = None):
+        if not flatpak_info.has_group(group):
+            return default
+        if not flatpak_info.has_key(group, key):
+            return default
+        return flatpak_info.get_string(group, key)
+
+    def safe_get_string_dict(group: str, key: str):
+
+        if not flatpak_info.has_group(group):
+            return {}
+        return keyfile_get_string_dict(flatpak_info, group, key)
+
+    filesystems = filesystems  
 
     return {
-        "flatpak-version": flatpak_info.get_string("Instance", "flatpak-version"),
-        "runtime": flatpak_info.get_string("Application", "runtime"),
-        "runtime-path": flatpak_info.get_string("Instance", "runtime-path"),
-        "app-extensions": keyfile_get_string_dict(flatpak_info, "Instance", "app-extensions"),
-        "runtime-extensions": keyfile_get_string_dict(flatpak_info, "Instance", "runtime-extensions"),
-        "filesystems": filesystems
+        "flatpak-version": safe_get_string("Instance", "flatpak-version", default=None),
+        "runtime": safe_get_string("Application", "runtime", default=None),
+        "runtime-path": safe_get_string("Instance", "runtime-path", default=None),
+
+        "app-extensions": safe_get_string_dict("Instance", "app-extensions"),
+        "runtime-extensions": safe_get_string_dict("Instance", "runtime-extensions"),
+
+        "filesystems": filesystems,
     }
 
 
