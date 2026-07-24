@@ -106,34 +106,52 @@ def keyfile_get_string_dict(keyfile, section, key):
     except GLib.Error:
         return {}
 
-
 def read_flatpak_info():
+    flatpak_info = GLib.KeyFile.new()
 
-    def safe_get_string(group: str, key: str, default: str | None = None):
+    try:
+        flatpak_info.load_from_file(FLATPAK_INFO, GLib.KeyFileFlags.NONE)
+    except GLib.Error as e:
+        raise RuntimeError(f"Could not read {FLATPAK_INFO}: {e}")
+
+    def safe_get_string(group: str, key: str, default=None):
         if not flatpak_info.has_group(group):
             return default
-        if not flatpak_info.has_key(group, key):
+
+        try:
+            if not flatpak_info.has_key(group, key):
+                return default
+        except TypeError:
+            if not flatpak_info.has_key(group, key, None):
+                return default
+
+        try:
+            return flatpak_info.get_string(group, key)
+        except GLib.Error:
             return default
-        return flatpak_info.get_string(group, key)
 
     def safe_get_string_dict(group: str, key: str):
-
         if not flatpak_info.has_group(group):
             return {}
-        return keyfile_get_string_dict(flatpak_info, group, key)
 
-    filesystems = safe_get_string_dict("Instance", "filesystems")
+        try:
+            return keyfile_get_string_dict(flatpak_info, group, key)
+        except GLib.Error:
+            return {}
+
+    try:
+        filesystems = flatpak_info.get_string_list("Context", "filesystems")
+    except GLib.Error:
+        filesystems = []
+
     return {
-        "flatpak-version": safe_get_string("Instance", "flatpak-version", default=None),
-        "runtime": safe_get_string("Application", "runtime", default=None),
-        "runtime-path": safe_get_string("Instance", "runtime-path", default=None),
-
+        "flatpak-version": safe_get_string("Instance", "flatpak-version"),
+        "runtime": safe_get_string("Application", "runtime"),
+        "runtime-path": safe_get_string("Instance", "runtime-path"),
         "app-extensions": safe_get_string_dict("Instance", "app-extensions"),
         "runtime-extensions": safe_get_string_dict("Instance", "runtime-extensions"),
-
         "filesystems": filesystems,
     }
-
 
 def env_is_true(env_str: str):
     if env_str.lower() in ["y", "yes", "true"]:
