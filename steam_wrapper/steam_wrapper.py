@@ -122,8 +122,7 @@ def read_flatpak_info():
             return {}
         return keyfile_get_string_dict(flatpak_info, group, key)
 
-    filesystems = filesystems  
-
+    filesystems = safe_get_string_dict("Instance", "filesystems")
     return {
         "flatpak-version": safe_get_string("Instance", "flatpak-version", default=None),
         "runtime": safe_get_string("Application", "runtime", default=None),
