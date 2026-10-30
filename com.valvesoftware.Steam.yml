@@ -1,9 +1,9 @@
 id: com.valvesoftware.Steam
 runtime: org.freedesktop.Platform
-runtime-version: &runtime-version '25.08'
-x-runtime-version-extra: &runtime-version-extra 25.08-extra
+runtime-version: &runtime-version '26.08'
+x-runtime-version-extra: &runtime-version-extra 26.08-extra
 x-gl-version: &gl-version '1.4'
-x-gl-versions: &gl-versions 25.08;25.08-extra;1.4
+x-gl-versions: &gl-versions 26.08;26.08-extra;1.4
 x-gl-merge-dirs: &gl-merge-dirs vulkan/icd.d;glvnd/egl_vendor.d;egl/egl_external_platform.d;OpenCL/vendors;lib/dri;lib/d3d;lib/gbm;vulkan/explicit_layer.d;vulkan/implicit_layer.d;vdpau
 sdk: org.freedesktop.Sdk
 command: steam
@@ -176,11 +176,11 @@ cleanup-commands:
 
 modules:
 
-  - python3-requirements.json
-
   - modules.yml
 
   - modules-32bit.yml
+
+  - python3-requirements.json
 
   - name: dotconf
     cleanup:
@@ -299,7 +299,7 @@ modules:
         cp /usr/bin/addr2line /app/bin/
         cp /usr/lib/x86_64-linux-gnu/libbfd-*.so /app/lib/
         install -Dm644 -t /app/etc ld.so.conf
-        libloadguard-config-converter --manifest blocklist/* --outfile /app/etc/libloadguard.blockedlist
+        shared-library-guard-config-converter blocklist/* --outfile /app/etc/freedesktop-sdk.ld.so.blockedlist
         mkdir -p /app/share/steam/compatibilitytools.d
         mkdir -p /app/utils /app/share/vulkan
         ln -srv /app/{utils/,}share/vulkan/explicit_layer.d

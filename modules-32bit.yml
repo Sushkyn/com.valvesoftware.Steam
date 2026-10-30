@@ -39,17 +39,19 @@ modules:
     sources:
       - type: git
         url: https://github.com/gperftools/gperftools.git
-        commit: d837a42788ba591d5d791c3b686f2738e7a93562
-        tag: gperftools-2.18.1
+        commit: d8b459be774d28e2d5cfd8190faf85cd39850179
+        tag: gperftools-2.19.1
         x-checker-data:
           type: json
           url: https://api.github.com/repos/gperftools/gperftools/releases/latest
           tag-query: .tag_name
 
-  - name: libloadguard-32bit
+  - name: shared-library-guard-32bit
     build-options:
       arch:
         x86_64: *compat_i386_opts
     buildsystem: meson
+    config-opts:
+      - -Dshared_library_guard_config=/app/etc/freedesktop-sdk.ld.so.blockedlist
     sources:
-      - sources/libloadguard.json
+      - sources/shared-library-guard-git.json
